@@ -1,0 +1,25 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t saran/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run saran/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t saran/multi-client ./client  
+  - docker build -t saran/multi-nginx ./nginx
+  - docker build -t saran/multi-server ./server
+  - docker build -t saran/multi-worker ./worker
+  # login to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+# push images
+  - docker push saran/multi-client
+  - docker push saran/multi-nginx
+  - docker push saran/multi-server
+  - docker push saran/multi-worker
+
+      
+      
